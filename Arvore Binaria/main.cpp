@@ -17,6 +17,7 @@ struct Aluno{
     char cidade[40];
     Aluno *dir;
     Aluno *esq;
+    int nivel;
 };
 
 #define CARGA_MAXIMA 0.6
@@ -24,6 +25,7 @@ struct Aluno{
 
 struct NO{
     Aluno *raiz;
+    int altura;
 };
 
 NO a;
@@ -36,9 +38,9 @@ void inicializa(){
 Aluno *lerAluno();
 FILE * abrir_arquivo( const char * arquivo, const char * modo);
 void processoLeituraInsercao();
-bool inserirNaArvore(Aluno * atual, Aluno * no);
 void imprimirArvore(Aluno *no, int nivel);
-bool buscaPorNome(char * nome, Aluno * no);
+bool inserirArvore(Aluno * alunoParaInserir, Aluno * noRaiz);
+bool buscaPeloNome(char * nome, Aluno * noRaiz);
 void pesquisa();
 
 //============================================================================================
@@ -69,60 +71,9 @@ void processoLeituraInsercao(){
     while(!feof(arq)){
         Aluno *c = lerAluno();
         fscanf(arq, "%[^,], %[^,], %[^,] , %lf, %d, %[^,], %[^,\n] ", c->matricula, c->cpf, c->nome, &c->nota, &c->idade, c->curso, c->cidade);
-        inserirNaArvore(c, a.raiz);
+        inserirArvore(c, a.raiz);
     }
     fclose(arq);
-}
-
-bool inserirNaArvore(Aluno * atual, Aluno * no){
-
-    // printf("\nvou imprimir %s\n", atual->nome);
-    // system("pause");
-    if(no == NULL){
-        a.raiz = atual;
-        return true;
-    }
-
-    if (strcmp(atual->nome, no->nome) == 0)  {
-        //sao iguais
-        if(no->esq == NULL){
-            //insere
-            no->esq = atual;
-            return true;
-        }
-        else{
-            //faca com que o no fique logo encima
-            atual->esq = no->esq;
-            no->esq = atual->esq;
-            return true;
-        }
-    }
-    else if(strcmp(atual->nome, no->nome) < 0){
-        //atual-> nome vem antes no alfabeto ou seja, ficara na direita
-        if(no->dir == NULL){
-            //insere
-            no->dir = atual;
-            return true;
-        }
-        else{
-            inserirNaArvore(atual, no->dir);
-        }
-    }
-    else{
-        //atual-> nome vem depois no alfabeto ou seja, ficara na esquerda
-        if(no->esq == NULL){
-            //insere
-            no->esq = atual;
-            return true;
-        }
-        else{
-            inserirNaArvore(atual, no->esq);
-            return true;
-        }
-
-    }
-    return true;
-    
 }
 
 void imprimirArvore(Aluno *no, int nivel) {
@@ -143,32 +94,79 @@ void imprimirArvore(Aluno *no, int nivel) {
     }
 }
 
-bool buscaPorNome(char * nome, Aluno * no){
-    if(strcmp(nome, no->nome) == 0){
-        return true;
+bool inserirArvore(Aluno * alunoParaInserir, Aluno * noRaiz){
+    if(alunoParaInserir == NULL){
+        return false;
     }
-    else if(strcmp(nome, no->nome) < 0){
-        //vai para a direita
-        buscaPorNome(nome, no->dir);
+    
+    if(noRaiz == NULL){
+        a.raiz = alunoParaInserir;
         return true;
     }
     else{
-        // vai para esquerda
-        buscaPorNome(nome, no->esq);
+        if(strcmp(noRaiz->nome, alunoParaInserir->nome) == 0){
+            if(noRaiz->esq == NULL){
+                noRaiz->esq = alunoParaInserir;
+                return true;
+            }
+            else{
+                return inserirArvore(alunoParaInserir, noRaiz->esq);
+            }
+        }
+        else if(strcmp(noRaiz->nome, alunoParaInserir->nome) < 0){
+            if(noRaiz->dir == NULL){
+                noRaiz->dir = alunoParaInserir;
+                return true;
+            }
+            else{
+                return inserirArvore(alunoParaInserir, noRaiz->dir);
+            }
+        }
+        else{
+            if(noRaiz->esq == NULL){
+                noRaiz->esq = alunoParaInserir;
+                return true;
+            }
+            else{
+                return inserirArvore(alunoParaInserir, noRaiz->esq);
+                }
+            }
+    }
+    return true;
+}
+
+bool buscaPeloNome(char * nome, Aluno * noRaiz){
+    if(noRaiz == NULL) return false;
+    if(strcmp(noRaiz->nome, nome) == 0){
+        cout << "\nachei: " << noRaiz->nome << endl;
+        system("pause");
         return true;
     }
+    else if(strcmp(noRaiz->nome, nome) < 0){
+        return buscaPeloNome(nome, noRaiz->dir);
+    }
+    else{
+        return buscaPeloNome(nome, noRaiz->esq);
+    }
+    return false;
 }
 
 void pesquisa(){
     char nome[70];
-    cout << "\n\nDigite o nome que deseja buscar: ";
-    cin >> nome;
-    if(buscaPorNome(nome, a.raiz) == true){
-        cout << "\n\nachei" << endl;
+    printf("\n\nDigite o nome para buscar: ");
+    fgets(nome, sizeof(nome), stdin);
+
+    // Remove o '\n' do final, se houver
+    nome[strcspn(nome, "\n")] = '\0';
+
+
+    if(buscaPeloNome(nome, a.raiz) == true){
+        cout << "\nachei" << endl;
     }
     else{
-        cout << "\n\nnao achei" << endl;
+        cout << "\nnao acheiieieei" << endl;
     }
+
 }
 
 int main() {
@@ -181,6 +179,8 @@ int main() {
     clock_t fim = clock();
     double tempo = double(fim - inicio) / CLOCKS_PER_SEC;
     cout << "\nTempo decorrido: " << tempo << " segundos" << endl;
+
+    // imprimirArvore(a.raiz, 0);
 
     pesquisa();
 
