@@ -20,9 +20,6 @@ struct Aluno{
     int nivel;
 };
 
-#define CARGA_MAXIMA 0.6
-#define TAMANHO_HASH_INICIAL 1021
-
 struct NO{
     Aluno *raiz;
     int altura;
@@ -39,7 +36,7 @@ Aluno *lerAluno();
 FILE * abrir_arquivo( const char * arquivo, const char * modo);
 void processoLeituraInsercao();
 void imprimirArvore(Aluno *no, int nivel);
-bool inserirArvore(Aluno * alunoParaInserir, Aluno * noRaiz);
+bool inserirArvore(Aluno * alunoParaInserir, Aluno * noRaiz, int nivel);
 bool buscaPeloNome(char * nome, Aluno * noRaiz);
 void pesquisa();
 
@@ -71,7 +68,7 @@ void processoLeituraInsercao(){
     while(!feof(arq)){
         Aluno *c = lerAluno();
         fscanf(arq, "%[^,], %[^,], %[^,] , %lf, %d, %[^,], %[^,\n] ", c->matricula, c->cpf, c->nome, &c->nota, &c->idade, c->curso, c->cidade);
-        inserirArvore(c, a.raiz);
+        inserirArvore(c, a.raiz, 0);
     }
     fclose(arq);
 }
@@ -94,7 +91,12 @@ void imprimirArvore(Aluno *no, int nivel) {
     }
 }
 
-bool inserirArvore(Aluno * alunoParaInserir, Aluno * noRaiz){
+bool inserirArvore(Aluno * alunoParaInserir, Aluno * noRaiz, int nivel){
+    
+    if(++nivel > a.altura){
+        a.altura = nivel;
+    }
+    
     if(alunoParaInserir == NULL){
         return false;
     }
@@ -110,7 +112,7 @@ bool inserirArvore(Aluno * alunoParaInserir, Aluno * noRaiz){
                 return true;
             }
             else{
-                return inserirArvore(alunoParaInserir, noRaiz->esq);
+                return inserirArvore(alunoParaInserir, noRaiz->esq, nivel);
             }
         }
         else if(strcmp(noRaiz->nome, alunoParaInserir->nome) < 0){
@@ -119,7 +121,7 @@ bool inserirArvore(Aluno * alunoParaInserir, Aluno * noRaiz){
                 return true;
             }
             else{
-                return inserirArvore(alunoParaInserir, noRaiz->dir);
+                return inserirArvore(alunoParaInserir, noRaiz->dir, nivel);
             }
         }
         else{
@@ -128,7 +130,7 @@ bool inserirArvore(Aluno * alunoParaInserir, Aluno * noRaiz){
                 return true;
             }
             else{
-                return inserirArvore(alunoParaInserir, noRaiz->esq);
+                return inserirArvore(alunoParaInserir, noRaiz->esq, nivel);
                 }
             }
     }
@@ -179,6 +181,7 @@ int main() {
     clock_t fim = clock();
     double tempo = double(fim - inicio) / CLOCKS_PER_SEC;
     cout << "\nTempo decorrido: " << tempo << " segundos" << endl;
+    cout << "\nA altura da arvore e: " << a.altura << endl;
 
     // imprimirArvore(a.raiz, 0);
 
