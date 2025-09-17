@@ -68,7 +68,14 @@ void processoLeituraInsercao(){
     fclose(arq);
 }
 
+int maiorIndice = 0;
+
 bool inserirArvore(Aluno * alunoParaInserir, int indice, int i){
+
+    if(indice > maiorIndice){
+        maiorIndice = indice;
+    }
+    
     if(a.raiz[indice] == NULL){
         a.raiz[indice] = alunoParaInserir;
         a.insercoes++;
@@ -77,16 +84,44 @@ bool inserirArvore(Aluno * alunoParaInserir, int indice, int i){
     else{
         int comp = strcmp(a.raiz[indice]->nome, alunoParaInserir->nome);
         if( comp < 0){
+            // menor que zero
             indice = 2 * i + 2;
             return inserirArvore(alunoParaInserir, indice, ++i);
         }   
         else{
+            // maior que zero
             indice = 2 * i + 1;
             return inserirArvore(alunoParaInserir, indice , ++i);
         }
     }
     return true;
 }
+
+bool buscar(char * nome){
+    
+    bool achei = false;
+    int indice = 0;
+    int i = 0;
+    int comp;
+    do
+    {
+        comp = strcmp(a.raiz[indice]->nome, nome); 
+        if (comp == 0){
+            achei = true;
+        }
+        else if(achei < 0){
+            indice = 2 * i++ + 2;
+        }
+        else{
+            indice = 2 * i++ + 1;
+        }
+
+    } while ((!achei) || indice >= maiorIndice);
+    
+    return achei;
+}
+
+
 
 
 
@@ -108,19 +143,19 @@ void imprimirIndices(int n) {
 }
 
 
-
 int main() {
 
     clock_t inicio = clock();
     system("cls");
     inicializa();
     processoLeituraInsercao();
-    imprimirIndices(10);
+    // imprimirIndices(12);
 
     clock_t fim = clock();
     double tempo = double(fim - inicio) / CLOCKS_PER_SEC;
     cout << "\nTempo decorrido: " << tempo << " segundos" << endl;
     cout << "o numero de insercoes foi: " << a.insercoes << endl;
+    cout << "o maior indice foi: " << maiorIndice << endl;
 
 
     return 0;
