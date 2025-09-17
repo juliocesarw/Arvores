@@ -36,7 +36,7 @@ Aluno *lerAluno();
 FILE * abrir_arquivo( const char * arquivo, const char * modo);
 void processoLeituraInsercao();
 bool inserirArvore(Aluno * alunoParaInserir, int indice, int i);
-void imprimirIndices(int n);
+// void imprimirIndices(int n);
 //============================================================================================
 
 // funcoes
@@ -97,6 +97,20 @@ bool inserirArvore(Aluno * alunoParaInserir, int indice, int i){
     return true;
 }
 
+bool insereComFor(Aluno * alunoParaInserir){
+    int indice = 0;
+    for (int i = 0; i < TAMANHO; i++)
+    {
+        if(a.raiz[indice] == NULL){
+            a.raiz[indice] = alunoParaInserir;
+        }
+        else if(strcmp(){
+
+        }
+    }
+    
+}
+
 bool buscar(char * nome){
     
     bool achei = false;
@@ -125,22 +139,22 @@ bool buscar(char * nome){
 
 
 
-void imprimirIndices(int n) {
-    if (n == 0 || a.raiz[0] == nullptr) {
-        cout << "Árvore vazia!\n";
-        return;
-    }
+// void imprimirIndices(int n) {
+//     if (n == 0 || a.raiz[0] == nullptr) {
+//         cout << "Árvore vazia!\n";
+//         return;
+//     }
 
-    for (int i = 0; i < n; i++) {
-        cout << i << ": ";
-        if (a.raiz[i] != NULL) {
-            cout << a.raiz[i]->nome;
-        } else {
-            cout << "(vazio)";
-        }
-        cout << "\n";
-    }
-}
+//     for (int i = 0; i < n; i++) {
+//         cout << i << ": ";
+//         if (a.raiz[i] != NULL) {
+//             cout << a.raiz[i]->nome;
+//         } else {
+//             cout << "(vazio)";
+//         }
+//         cout << "\n";
+//     }
+// }
 
 
 int main() {
@@ -156,6 +170,8 @@ int main() {
     cout << "\nTempo decorrido: " << tempo << " segundos" << endl;
     cout << "o numero de insercoes foi: " << a.insercoes << endl;
     cout << "o maior indice foi: " << maiorIndice << endl;
+
+    // só insere
 
 
     return 0;
