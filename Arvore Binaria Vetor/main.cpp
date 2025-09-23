@@ -35,9 +35,9 @@ void inicializa(){
 Aluno *lerAluno();
 FILE * abrir_arquivo( const char * arquivo, const char * modo);
 void processoLeituraInsercao();
-bool inserirArvore(Aluno * alunoParaInserir, int indice, int i);
-// void imprimirIndices(int n);
+bool insereComFor(Aluno * alunoParaInserir);
 //============================================================================================
+int maiorIndice = 0;
 
 // funcoes
 
@@ -57,122 +57,83 @@ FILE * abrir_arquivo(const char * arquivo, const char * modo){
 }
 
 void processoLeituraInsercao(){
+    int contador = 0;
     FILE * arq;
-    arq = abrir_arquivo("../../textos/teste.csv", "r");
+    arq = abrir_arquivo("../../textos/alunos_completos.csv", "r");
 
     while(!feof(arq)){
         Aluno *c = lerAluno();
         fscanf(arq, "%[^,], %[^,], %[^,] , %lf, %d, %[^,], %[^,\n] ", c->matricula, c->cpf, c->nome, &c->nota, &c->idade, c->curso, c->cidade);
-        if(!inserirArvore(c, 0, 0)) break;;
+        if(insereComFor(c) == false){
+            break;
+        } 
+        contador++;
+        if(contador % 100000 == 0){
+            cout << "ja coloquei um monte: " << contador << endl;
+            system("pause");
+        }
     }
     fclose(arq);
 }
 
-int maiorIndice = 0;
+bool insereComFor(Aluno * alunoParaInserir){
+    int indice = 0;
+    bool limite = true;
+    for (int i = 0; i < TAMANHO; i++)
+    {
 
-bool inserirArvore(Aluno * alunoParaInserir, int indice, int i){
+        //para o maior indice
+        if(indice > maiorIndice){
+            maiorIndice = indice;
+        }
 
-    if(indice > maiorIndice){
-        maiorIndice = indice;
-    }
-    
-    if(a.raiz[indice] == NULL){
-        a.raiz[indice] = alunoParaInserir;
-        a.insercoes++;
+        //para vazamentos
+        if(indice >= TAMANHO){
+            cout << "passou do limite\n" << endl;
+            cout << "indice: " << indice << endl;
+            system("pause");
+            limite = false; 
+            break;
+        }
+
+        if(a.raiz[indice] == nullptr){
+            a.raiz[indice] = alunoParaInserir;
+            a.insercoes++;
+            break;
+        }
+        else if(strcmp(a.raiz[indice]->nome, alunoParaInserir->nome) < 0){
+            //vai para a direita
+            indice = 2 * i + 2;
+        }
+        else{
+            //vai para a esquerda
+            indice = 2 * i + 1;
+        }
+    }//for
+    if(limite == true){
         return true;
     }
     else{
-        int comp = strcmp(a.raiz[indice]->nome, alunoParaInserir->nome);
-        if( comp < 0){
-            // menor que zero
-            indice = 2 * i + 2;
-            return inserirArvore(alunoParaInserir, indice, ++i);
-        }   
-        else{
-            // maior que zero
-            indice = 2 * i + 1;
-            return inserirArvore(alunoParaInserir, indice , ++i);
-        }
-    }
-    return true;
-}
-
-bool insereComFor(Aluno * alunoParaInserir){
-    int indice = 0;
-    for (int i = 0; i < TAMANHO; i++)
-    {
-        if(a.raiz[indice] == NULL){
-            a.raiz[indice] = alunoParaInserir;
-        }
-        else if(strcmp(){
-
-        }
+        return false;
     }
     
 }
-
-bool buscar(char * nome){
-    
-    bool achei = false;
-    int indice = 0;
-    int i = 0;
-    int comp;
-    do
-    {
-        comp = strcmp(a.raiz[indice]->nome, nome); 
-        if (comp == 0){
-            achei = true;
-        }
-        else if(achei < 0){
-            indice = 2 * i++ + 2;
-        }
-        else{
-            indice = 2 * i++ + 1;
-        }
-
-    } while ((!achei) || indice >= maiorIndice);
-    
-    return achei;
-}
-
-
-
-
-
-// void imprimirIndices(int n) {
-//     if (n == 0 || a.raiz[0] == nullptr) {
-//         cout << "Árvore vazia!\n";
-//         return;
-//     }
-
-//     for (int i = 0; i < n; i++) {
-//         cout << i << ": ";
-//         if (a.raiz[i] != NULL) {
-//             cout << a.raiz[i]->nome;
-//         } else {
-//             cout << "(vazio)";
-//         }
-//         cout << "\n";
-//     }
-// }
 
 
 int main() {
+
+    cout << TAMANHO;
 
     clock_t inicio = clock();
     system("cls");
     inicializa();
     processoLeituraInsercao();
-    // imprimirIndices(12);
-
+        
     clock_t fim = clock();
     double tempo = double(fim - inicio) / CLOCKS_PER_SEC;
     cout << "\nTempo decorrido: " << tempo << " segundos" << endl;
     cout << "o numero de insercoes foi: " << a.insercoes << endl;
-    cout << "o maior indice foi: " << maiorIndice << endl;
-
-    // só insere
-
+    cout << "ultimo indice: " << maiorIndice << endl;
 
     return 0;
 }
