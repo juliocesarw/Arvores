@@ -26,7 +26,6 @@ struct Aluno{
     int altura;
 };
 
-
 struct Alunos{
     Aluno *raiz;
     int quantidade;
@@ -41,22 +40,21 @@ void inicializa(){
     a.raiz = NULL;
 }
 
-int alturaFb(Aluno *no) {
-    return (no == NULL) ? -1 : no->altura; // NULL = -1
-}
-
-int fatorBalanceamentoNo(Aluno *no) {
-    return alturaFb(no->esq) - alturaFb(no->dir);
-}
-
 int altura(Aluno *no) {
-    return (no == NULL) ? -1 : no->altura;
+    if (no == NULL) return -1; // ou 0, depende da sua convenção
+    return no->altura;
 }
 
 void atualizaAltura(Aluno *no) {
-    int altEsq = altura(no->esq);
-    int altDir = altura(no->dir);
-    no->altura = (altEsq > altDir ? altEsq : altDir) + 1;
+    if (no != NULL) {
+        int altEsq = altura(no->esq);
+        int altDir = altura(no->dir);
+        no->altura = 1 + (altEsq > altDir ? altEsq : altDir);
+    }
+}
+
+int fatorBalanceamento(Aluno *no){
+    return altura(no->esq) - altura(no->dir);
 }
 
 Aluno* rotacaoSimplesDireita(Aluno *x) {
@@ -109,7 +107,10 @@ Aluno* adicionarAluno(Aluno *no, Aluno *novoAluno){
         return no = novoAluno;
     }
 
-    if(strcmp(no->nome, novoAluno->nome) < 0){
+    if(strcmp(no->nome, novoAluno->nome) == 0){
+        no->esq = adicionarAluno(no->esq, novoAluno);
+    }
+    else if(strcmp(no->nome, novoAluno->nome) < 0){
         no->dir = adicionarAluno(no->dir, novoAluno);
     }
     else{
@@ -118,28 +119,24 @@ Aluno* adicionarAluno(Aluno *no, Aluno *novoAluno){
 
     atualizaAltura(no);
 
+    int fb = fatorBalanceamento(no);
     
-    int fatorBalanceamento = fatorBalanceamentoNo(no);
-    cout << fatorBalanceamento << endl;
-    system("pause");
-
-
-
     //Como aplicar as rotações?
     //Aplica rotações conforme o caso
-    if(fatorBalanceamento > 1 && no->esq->altura > 0) {
+    if(fb > 1 && (altura(no->esq) - altura(no->dir)) >= 0) {
         //positivo + esq positivo
         return rotacaoSimplesDireita(no);
     }
-    if(fatorBalanceamento < -1 && no->dir->altura < 0) {
+    if(fb < -1 && (altura(no->esq) - altura(no->dir)) <= 0) {
         // negativo + dir negativo
         return rotacaoSimplesEsquerda(no);
+         
     }
-    if(fatorBalanceamento > 1 && no->esq->altura < 0) {
+    if(fb > 1 && (altura(no->esq) - altura(no->dir)) < 0) {
         // positivo + esq negativo
         return rotacaoDuplaDireita(no);
     }
-    if(fatorBalanceamento < -1 && no->dir->altura > 0) {
+    if(fb < -1 && (altura(no->esq) - altura(no->dir)) > 0) {
         // negativo + dir positivo RDE
         return rotacaoDuplaEsquerda(no);
     }
@@ -151,6 +148,7 @@ Aluno *lerAluno(){
     Aluno *b = new Aluno;
     b->dir = NULL;
     b->esq = NULL;
+    b->altura = 0;
     return b;
 }
 
