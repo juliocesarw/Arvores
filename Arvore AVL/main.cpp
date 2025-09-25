@@ -101,10 +101,6 @@ Aluno* adicionarAluno(Aluno *no, Aluno *novoAluno){
         a.quantidade++;
         return no = novoAluno;
     }
-
-    if(strcmp(no->nome, novoAluno->nome) == 0){
-        no->esq = adicionarAluno(no->esq, novoAluno);
-    }
     else if(strcmp(no->nome, novoAluno->nome) < 0){
         no->dir = adicionarAluno(no->dir, novoAluno);
     }
@@ -163,7 +159,7 @@ FILE * abrir_arquivo(const char * arquivo, const char * modo){
 
 void processoLeituraInsercao(){
     FILE * arq;
-    arq = abrir_arquivo("../../textos/teste.csv", "r");
+    arq = abrir_arquivo("../../textos/alunos_completos.csv", "r");
 
     while(!feof(arq)){
         Aluno *c = lerAluno();
@@ -191,7 +187,7 @@ void printAVL(Aluno *raiz, int nivel = 0) {
     printAVL(raiz->esq, nivel + 1);
 }
 
-Aluno * pesquisar(const char * nome, Aluno * raiz){
+Aluno * pesquisar(char * nome, Aluno * raiz){
     if(raiz == NULL){
         return NULL;
     }
@@ -210,7 +206,30 @@ Aluno * pesquisar(const char * nome, Aluno * raiz){
 
 }
 
-Aluno * excluirAluno(const char * nome, Aluno *no){
+void passarValorCasoExclusaoComDoisFilhos(Aluno * destino, Aluno * origem){
+//                                        (     no     )(filho menor direita)
+    /*
+        Essa funcao e exclusivamente para copiar os valores
+        do filho menor da direita para o no do pai
+
+        nao foi o chat que fez julio kkkkkkkkkkk
+
+        a funcao e necessaria pq eu nao sei fazer isso mudando o
+        endereco de memoria, entao e mais facil fazer a troca
+        dos dados
+    */
+
+    strcpy(destino->nome, origem->nome);
+    strcpy(destino->cpf, origem->cpf);
+    strcpy(destino->nome, origem->nome);
+    destino->nota = origem->nota;
+    destino->idade = origem->idade;
+    strcpy(destino->curso, origem->curso);
+    strcpy(destino->cidade, origem->cidade);
+
+}
+
+Aluno * excluirAluno(char * nome, Aluno *no){
 
     if(no == NULL){
         cout << "nome não encontrado" << endl;
@@ -221,29 +240,36 @@ Aluno * excluirAluno(const char * nome, Aluno *no){
 
     if(comparacaoDosNomes == 0){
 
-        Aluno *aux;
-        Aluno *aux2;
+        Aluno *filhoEsq;
 
         if(no->dir == NULL && no->esq == NULL){
+            // no folha
             return NULL;
         }
         else if(no->dir == NULL){
+            // "lista encadeada"
             return no->esq;
         }
         else if(no->esq == NULL){
+            // "lista encadeada"
             return no->dir;
         }
         else{
-            aux = no->dir;
-            while(no->esq != NULL){
-                aux = no->esq;
+            // no tem dois filhos
+            if(no->dir->esq == NULL && no->dir->dir == NULL){
+                // a direita do no nao tem filho a esquerda
+                no->dir->esq = no->esq;
+                return no->dir;
             }
-            if(aux->dir == NULL && aux->esq == NULL){
-                aux2 = no;
-                no = aux;
-                aux = aux2;
-                no = excluirAluno(nome, no);
-                return no;
+            else{
+                filhoEsq = no->dir;
+                while(filhoEsq->esq != NULL){
+                    filhoEsq = filhoEsq->esq;
+                }
+
+                passarValorCasoExclusaoComDoisFilhos(no, filhoEsq);   
+                no->dir = excluirAluno(filhoEsq->nome, no->dir);
+                return no;                
             }
         }
     }
@@ -278,25 +304,87 @@ Aluno * excluirAluno(const char * nome, Aluno *no){
     return no;
 }
 
+int escolha(){
+    
+    int op;
+    system("cls");
+    printf("\t\tMENU\n\n");
+    printf("1 - PESQUISAR\n");
+    printf("2 - IMPRIMIR\n");
+    printf("3 - EXCLUIR\n");
+    printf("0 - SAIR\n\n");
+    
+    printf("Opcao: ");
+    scanf("%d", &op);
+    getchar();
+    return op;
+}
+
+void menu(){
+    int x;
+    do
+    {
+        x = escolha();
+        switch (x)
+        {
+        case 1:{
+
+            char nome[40];
+            cout << "nome a pesquisar: ";
+            scanf("%250[^\n]s", nome);
+            getchar();
+            Aluno * resultadoDaPesquisa = pesquisar(nome, a.raiz);
+            
+            if(resultadoDaPesquisa != NULL){
+                cout << "achei o(a): " << resultadoDaPesquisa->nome << endl;
+            }
+            else{
+                cout << "nao achei o(a): " << nome << endl;
+            }
+            system("pause");
+            break;
+            }
+        case 2:
+            printAVL(a.raiz);
+            break;
+        case 3:{
+            char nome[40];
+            cout << "aluno a excluir: ";
+            scanf("%250[^\n]s", nome);
+            getchar();
+            a.raiz = excluirAluno(nome, a.raiz);
+            break;
+        }
+        case 0:
+            break;
+        default:
+            printf("\n\nopcao inválida!!\n\n");
+            system("pause");
+            break;
+        }
+    } while (x != 0);
+}
+
 int main(){
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////PROCESSO DE LEITURA////////////////////////////////////////////////
     inicializa();
-
+    
     time_t inicio, fim;
-
+    
     inicio = clock();
     processoLeituraInsercao();
     fim = clock();
-
-    printAVL(a.raiz);
-    system("pause");
     
-    system("cls");
-    a.raiz = excluirAluno("Richard Morse Marcos", a.raiz);
-
-    printAVL(a.raiz);
-
     double tempo = double(fim - inicio) / CLOCKS_PER_SEC;
     printf("O tempo decorrido foi %lf segundos\n", tempo);
+    system("pause");
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////MENU////////////////////////////////////////////////////////
+
+    menu();
 
     return 0;
 }
