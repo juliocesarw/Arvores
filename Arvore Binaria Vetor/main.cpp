@@ -82,32 +82,33 @@ bool insereComFor(Aluno * alunoParaInserir){
     for (int i = 0; i < TAMANHO; i++)
     {
 
-        //para o maior indice
-        if(indice > maiorIndice){
-            maiorIndice = indice;
-        }
-
+        
         //para vazamentos
-        if(indice >= TAMANHO){
-            cout << "passou do limite\n" << endl;
+        if(2 * indice + 1  >= TAMANHO || 2 * indice + 2  >= TAMANHO){
+            cout << "chegou ao limite\n" << endl;
             cout << "indice: " << indice << endl;
             system("pause");
             limite = false; 
             break;
         }
 
-        if(a.raiz[indice] == nullptr){
+        //para o maior indice
+        if(indice > maiorIndice){
+            maiorIndice = indice;
+        }
+        
+        if(a.raiz[indice] == NULL){
             a.raiz[indice] = alunoParaInserir;
             a.insercoes++;
             break;
         }
         else if(strcmp(a.raiz[indice]->nome, alunoParaInserir->nome) < 0){
             //vai para a direita
-            indice = 2 * i + 2;
+            indice = 2 * indice + 2;
         }
         else{
             //vai para a esquerda
-            indice = 2 * i + 1;
+            indice = 2 * indice + 1;
         }
     }//for
     if(limite == true){
@@ -134,6 +135,16 @@ int main() {
     cout << "\nTempo decorrido: " << tempo << " segundos" << endl;
     cout << "o numero de insercoes foi: " << a.insercoes << endl;
     cout << "ultimo indice: " << maiorIndice << endl;
+
+    //////////////////////////////////////////////////////////////
+    /*
+    
+    O limite foi: 701023
+    O numero de insercoes foi: 908
+    ultimo indice foi: 701023
+    o tempo foi de: 14 segundos
+    
+    */
 
     return 0;
 }
