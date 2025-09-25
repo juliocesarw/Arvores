@@ -1,16 +1,9 @@
-//Exemplo da estrutura de arvore
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <string.h>
 #include <iostream>
 using namespace std;
-
-// using namespace std;
-
-//Exemplo do arquivo CSV que será lido
-//Matricula,CPF,Nome,Nota,Idade,Curso,Cidade
-//A0000000,915.216.859-08,Wallace Sampaio,20.35,23,Direito,Rio de Janeiro
 
 
 struct Aluno{
@@ -46,10 +39,12 @@ int altura(Aluno *no) {
 }
 
 void atualizaAltura(Aluno *no) {
-    if (no != NULL) {
-        int altEsq = altura(no->esq);
-        int altDir = altura(no->dir);
-        no->altura = 1 + (altEsq > altDir ? altEsq : altDir);
+    if (no != NULL) { 
+
+            int altEsq = altura(no->esq);
+            int altDir = altura(no->dir);
+            no->altura = 1 + (altEsq > altDir ? altEsq : altDir);
+
     }
 }
 
@@ -118,26 +113,30 @@ Aluno* adicionarAluno(Aluno *no, Aluno *novoAluno){
     }
 
     atualizaAltura(no);
-
-    int fb = fatorBalanceamento(no);
     
-    //Como aplicar as rotações?
-    //Aplica rotações conforme o caso
-    if(fb > 1 && (altura(no->esq) - altura(no->dir)) >= 0) {
+    int fb = fatorBalanceamento(no);
+    // cout << fb << endl;
+    // system("pause");
+    
+    if(fb > 1 && altura(no->esq->esq) - altura(no->esq->dir) > 0) {
         //positivo + esq positivo
+        // cout << "RSD" << endl;
         return rotacaoSimplesDireita(no);
     }
-    if(fb < -1 && (altura(no->esq) - altura(no->dir)) <= 0) {
+    if(fb < -1 && altura(no->dir->esq) - altura(no->dir->dir) < 0) {
         // negativo + dir negativo
+        // cout << "RSE" << endl;
         return rotacaoSimplesEsquerda(no);
-         
+        
     }
-    if(fb > 1 && (altura(no->esq) - altura(no->dir)) < 0) {
+    if(fb > 1 && altura(no->esq->esq) - altura(no->esq->dir) < 0) {
         // positivo + esq negativo
+        // cout << "RDD" << endl;
         return rotacaoDuplaDireita(no);
     }
-    if(fb < -1 && (altura(no->esq) - altura(no->dir)) > 0) {
+    if(fb < -1 && altura(no->dir->esq) - altura(no->dir->dir) > 0) {
         // negativo + dir positivo RDE
+        // cout << "RDE" << endl;
         return rotacaoDuplaEsquerda(no);
     }
 
@@ -192,26 +191,112 @@ void printAVL(Aluno *raiz, int nivel = 0) {
     printAVL(raiz->esq, nivel + 1);
 }
 
+Aluno * pesquisar(const char * nome, Aluno * raiz){
+    if(raiz == NULL){
+        return NULL;
+    }
+
+    int x = strcmp(nome, raiz->nome);
+
+    if(x == 0){
+        return raiz;
+    }
+    else if(x < 0){
+        return pesquisar(nome, raiz->esq);
+    }
+    else{
+        return pesquisar(nome, raiz->dir);
+    }
+
+}
+
+Aluno * excluirAluno(const char * nome, Aluno *no){
+
+    if(no == NULL){
+        cout << "nome não encontrado" << endl;
+        return NULL;
+    }
+
+    int comparacaoDosNomes = strcmp(nome, no->nome);
+
+    if(comparacaoDosNomes == 0){
+
+        Aluno *aux;
+        Aluno *aux2;
+
+        if(no->dir == NULL && no->esq == NULL){
+            return NULL;
+        }
+        else if(no->dir == NULL){
+            return no->esq;
+        }
+        else if(no->esq == NULL){
+            return no->dir;
+        }
+        else{
+            aux = no->dir;
+            while(no->esq != NULL){
+                aux = no->esq;
+            }
+            if(aux->dir == NULL && aux->esq == NULL){
+                aux2 = no;
+                no = aux;
+                aux = aux2;
+                no = excluirAluno(nome, no);
+                return no;
+            }
+        }
+    }
+    else if(comparacaoDosNomes < 0){
+        no->esq = excluirAluno(nome, no->esq);
+    }
+    else{
+        no->dir = excluirAluno(nome, no->dir);
+    }
+    atualizaAltura(no);
+
+    //agora faz o balanceamento
+    int fb = fatorBalanceamento(no);
+    
+    if(fb > 1 && altura(no->esq->esq) - altura(no->esq->dir) > 0) {
+        // cout << "RSD" << endl;
+        return rotacaoSimplesDireita(no);
+    }
+    if(fb < -1 && altura(no->dir->esq) - altura(no->dir->dir) < 0) {
+        // cout << "RSE" << endl;
+        return rotacaoSimplesEsquerda(no);
+    }
+    if(fb > 1 && altura(no->esq->esq) - altura(no->esq->dir) < 0) {
+        // cout << "RDD" << endl;
+        return rotacaoDuplaDireita(no);
+    }
+    if(fb < -1 && altura(no->dir->esq) - altura(no->dir->dir) > 0) {
+        // cout << "RDE" << endl;
+        return rotacaoDuplaEsquerda(no);
+    }
+
+    return no;
+}
 
 int main(){
     inicializa();
-    printf("=== SISTEMA DE LEITURA DE ALUNOS CSV ===\n\n");
-    //.....
+
     time_t inicio, fim;
+
     inicio = clock();
     processoLeituraInsercao();
-    system("cls");
-    printAVL(a.raiz);
-    
-    system("pause");
     fim = clock();
-    //se eu quiser pegar como inteiro o valor do tempo
+
+    printAVL(a.raiz);
+    system("pause");
+    
+    system("cls");
+    a.raiz = excluirAluno("Richard Morse Marcos", a.raiz);
+
+    printAVL(a.raiz);
 
     double tempo = double(fim - inicio) / CLOCKS_PER_SEC;
     printf("O tempo decorrido foi %lf segundos\n", tempo);
-
-    system("pause");
-
 
     return 0;
 }
